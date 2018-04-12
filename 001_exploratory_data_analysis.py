@@ -13,7 +13,6 @@ result in the largest information gain when running via decision tree
 #############################################################################
 # load required libs
 import pandas as pd
-import numpy as np
 from bokeh.plotting import figure, output_file, show, ColumnDataSource
 from bokeh.models import HoverTool
 from bokeh.models import NumeralTickFormatter
@@ -31,7 +30,8 @@ df = df.iloc[:,[0,1,2,4,5,6,8,10,13,16,18,20,21,22,23,24,25]]
 target_col = 'From what you have heard or seen, do you mostly agree or mostly disagree with the beliefs of White Nationalists?'
 target_val = 'Agree'
 df["WN"] = "Do Not Agree"
-df.loc[df[target_col] == target_val,"WN"] = "Agree with White Nationalism"
+df.loc[df[target_col] == target_val,"WN"] = "Agree with White Nationalists"
+len(df.loc[df[target_col] == target_val]) # 95 out of 1,000 agree
 
 # sort so legends are in correct order
 df = df.sort_values(by=['WN'])
@@ -39,18 +39,14 @@ df = df.sort_values(by=['WN'])
 
 
 
-"""
-
-this code works- don't fuck with it
-
 #############################################################################
 # visualize income v age via bokeh for the website
 
 # format our points based on group
-colormap = {'Do Not Agree': 'blue', 'Agree with White Nationalism': 'red'}
+colormap = {'Do Not Agree': 'blue', 'Agree with White Nationalists': 'red'}
 colors = [colormap[x] for x in df['WN']]
 
-sizemap = {'Do Not Agree': 5, 'Agree with White Nationalism': 10}
+sizemap = {'Do Not Agree': 5, 'Agree with White Nationalists': 10}
 sizes = [sizemap[x] for x in df['WN']]
 
 # format our data from the dataframe
@@ -85,7 +81,6 @@ p1.yaxis.formatter=NumeralTickFormatter(format="$0,0.00")
 p1.circle('x', 'y', color='colors', size='sizes', alpha=0.5, legend='desc', source=source)
 output_file("eda1.html", title="Income v Age")
 show(p1)
-"""
 
 
 
@@ -109,7 +104,7 @@ def plot_discrete_feature(df, discrete):
         total = len(df.loc[df[discrete] == a])
         
         # how many people who answered this way also agree w/ WN?
-        wn_total = len(df.loc[(df[discrete] == a) & (df["WN"] == 'Agree with White Nationalism')])
+        wn_total = len(df.loc[(df[discrete] == a) & (df["WN"] == 'Agree with White Nationalists')])
         
         # what percentage of people who answered this way agree w/ WN?
         wn_per = wn_total/total
@@ -134,7 +129,7 @@ def plot_discrete_feature(df, discrete):
     hover = HoverTool(
             tooltips=[
                 ("Group", "@totals people said \"@answers\""), 
-                ("Agree with White Nationalism", "@Agree{0.00%} (@wntotals people)"), 
+                ("Agree with White Nationalists", "@Agree{0.00%} (@wntotals people)"), 
                 ("Do Not Agree", "@Disagree{0.00%} (@nwntotals people)")           
             ]
         )
@@ -144,11 +139,11 @@ def plot_discrete_feature(df, discrete):
     
     # plot stacked bars
     p.vbar_stack(wngroup, x='answers', width=0.9, color=["#c13633","#346ac1"], source=source,
-                             legend=['Agree with White Nationalism','Do Not Agree'], name=wngroup)
+                             legend=['Agree with White Nationalists','Do Not Agree'], name=wngroup)
     
     # format our axes
     p.xaxis.axis_label = discrete
-    p.yaxis.axis_label = 'Percent of Respondents who Agree with White Nationalism'
+    p.yaxis.axis_label = 'Percent of Respondents who Agree with White Nationalists'
     p.yaxis.formatter=NumeralTickFormatter(format="0.00%")
     
     # output our file
@@ -158,15 +153,18 @@ def plot_discrete_feature(df, discrete):
 
 
 
+
 #############################################################################
 # split income into 3 groups**
     
-"""
+
 df["Do you earn $100,000 or more per year?"] = "No Answer"
 df.loc[df['Income'] < 100000,"Do you earn $100,000 or more per year?"] = "No"
 df.loc[df['Income'] >= 100000,"Do you earn $100,000 or more per year?"] = "Yes"
 p1 = plot_discrete_feature(df, 'Do you earn $100,000 or more per year?')
-tab1 = Panel(child=p1, title='Income')
+#show(p1)
+#tab1 = Panel(child=p1, title='Income')
+
 
 # group political affiliation into 4 groups
 df["What is your political affiliation?"] = "No Answer"
@@ -202,12 +200,12 @@ df.loc[df['What is your race?']=='DK/REF',"What is your race?"] = "No Answer"
 p5 = plot_discrete_feature(df, 'What is your race?')
 tab5 = Panel(child=p5, title='Race')
 
-"""
 
+"""
 
 # questions and answers
 
-
+"""
 # approve Donald Trump?
 df.loc[df['Do you approve or disapprove of how Donald Trump is handling his job as president?']=='DK/REF',"Do you approve or disapprove of how Donald Trump is handling his job as president?"] = "No Answer"
 p6 = plot_discrete_feature(df, 'Do you approve or disapprove of how Donald Trump is handling his job as president?')
@@ -233,10 +231,11 @@ df.loc[df['Have you lost any friendships or other relationships as a result of t
 p10 = plot_discrete_feature(df, 'Have you lost any friendships or other relationships as a result of the 2016 presidential election?')
 tab10 = Panel(child=p10, title='Q5')
 
+"""
 # *** Do you think it is likely or unlikely that there will be a Civil War in the United States within the next decade?
 df.loc[df['Do you think it is likely or unlikely that there will be a Civil War in the United States within the next decade?']=='DK/REF',"Do you think it is likely or unlikely that there will be a Civil War in the United States within the next decade?"] = "No Answer"
 p11 = plot_discrete_feature(df, 'Do you think it is likely or unlikely that there will be a Civil War in the United States within the next decade?')
-tab11 = Panel(child=p10, title='Q6')
+tab11 = Panel(child=p11, title='Q6')
 
 # Have you ever gone hunting?
 df.loc[df['Have you ever gone hunting?']=='DK/REF',"Have you ever gone hunting?"] = "No Answer"
@@ -251,7 +250,7 @@ tab13 = Panel(child=p13, title='Q8')
 # *** super odd because he is black...
 # If Dwayne "The Rock" Johnson ran for president as a candidate for your political party, would you vote for him?
 df.loc[df['If Dwayne "The Rock" Johnson ran for president as a candidate for your political party, would you vote for him?']=='DK/REF','If Dwayne "The Rock" Johnson ran for president as a candidate for your political party, would you vote for him?'] = "No Answer"
-q9 = plot_discrete_feature(df, 'If Dwayne "The Rock" Johnson ran for president as a candidate for your political party, would you vote for him?')
+p14 = plot_discrete_feature(df, 'If Dwayne "The Rock" Johnson ran for president as a candidate for your political party, would you vote for him?')
 tab14 = Panel(child=p14, title='Q9')
 
 # Who would you prefer as president of the United States, Darth Vader or Donald Trump?
@@ -262,11 +261,17 @@ tab15 = Panel(child=p15, title='Q10')
 
 
 # show as tabs - demographics
-#layout = Tabs(tabs=[tab1, tab2, tab3, tab4, tab5])
+#layout = Tabs(tabs=[tab2, tab3, tab4, tab5])
+#output_file('tabs.html')
+#show(layout)
+
+
+# show as tabs - questions
+#layout = Tabs(tabs=[tab6, tab7, tab8, tab9, tab10])
 #output_file('tabs.html')
 #show(layout)
 
 # show as tabs - questions
-layout = Tabs(tabs=[tab6, tab7, tab8, tab9, tab10, tab11, tab12, tab13, tab14, tab15])
+layout = Tabs(tabs=[tab11, tab12, tab13, tab14, tab15])
 output_file('tabs.html')
 show(layout)
