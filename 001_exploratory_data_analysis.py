@@ -231,7 +231,7 @@ df.loc[df['Have you lost any friendships or other relationships as a result of t
 p10 = plot_discrete_feature(df, 'Have you lost any friendships or other relationships as a result of the 2016 presidential election?')
 tab10 = Panel(child=p10, title='Q5')
 
-"""
+
 # *** Do you think it is likely or unlikely that there will be a Civil War in the United States within the next decade?
 df.loc[df['Do you think it is likely or unlikely that there will be a Civil War in the United States within the next decade?']=='DK/REF',"Do you think it is likely or unlikely that there will be a Civil War in the United States within the next decade?"] = "No Answer"
 p11 = plot_discrete_feature(df, 'Do you think it is likely or unlikely that there will be a Civil War in the United States within the next decade?')
@@ -259,19 +259,17 @@ p15 = plot_discrete_feature(df, 'Who would you prefer as president of the United
 tab15 = Panel(child=p15, title='Q10')
 
 
-
 # show as tabs - demographics
-#layout = Tabs(tabs=[tab2, tab3, tab4, tab5])
-#output_file('tabs.html')
-#show(layout)
-
+layout = Tabs(tabs=[tab2, tab3, tab4, tab5])
+output_file('tabs1.html')
+show(layout)
 
 # show as tabs - questions
-#layout = Tabs(tabs=[tab6, tab7, tab8, tab9, tab10])
-#output_file('tabs.html')
-#show(layout)
+layout = Tabs(tabs=[tab6, tab7, tab8, tab9, tab10])
+output_file('tabs2.html')
+show(layout)
 
 # show as tabs - questions
 layout = Tabs(tabs=[tab11, tab12, tab13, tab14, tab15])
-output_file('tabs.html')
+output_file('tabs3.html')
 show(layout)

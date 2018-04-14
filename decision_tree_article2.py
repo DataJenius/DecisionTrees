@@ -41,8 +41,10 @@ jojo["Education"]=df["What is your highest level of education?"].astype('categor
 jojo["Race"]=df["What is your race?"].astype('category')
 jojo["Help_Poor"]=df["Do you think that government policies should help those who are poor and struggling in America?"].astype('category')
 jojo["White_Racists"]=df["Do you think that most white people in America are racist?"].astype('category')
+
 # One Hot Encoding
 jojo = pd.get_dummies(jojo, columns=["Gender","Party","Approve","Education","Race","Help_Poor","White_Racists"])
+
 print(jojo.head())
 print(jojo.dtypes)
 cols = jojo.columns
