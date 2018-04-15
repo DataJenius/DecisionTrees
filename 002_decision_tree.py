@@ -20,7 +20,6 @@ from sklearn.externals.six import StringIO
 from sklearn.tree import export_graphviz
 import pydotplus
 from sklearn.metrics import accuracy_score
-
 from bokeh.plotting import figure, output_file, show, ColumnDataSource
 from bokeh.models import HoverTool
 from bokeh.models.widgets import Panel, Tabs
@@ -33,7 +32,6 @@ df = pd.read_csv('data/201710-CAH_PulseOfTheNation.csv')
 
 # keep only desired columns
 df = df.iloc[:,[0,1,2,4,5,6,8,10,13,16,18,20,21,22,23,24,25]]
-
 
 
 #####################################################################################
@@ -176,7 +174,7 @@ predicted = model.predict(features)
 # check our accuracy
 print(accuracy_score(labels,predicted))
 
-
+#############################################################################
 # look at feature importance
 feature_importance = {}
 for idx, val in enumerate(model.feature_importances_):

@@ -13,16 +13,21 @@ Use best practices to create a proper generalized decision tree model
 import pandas as pd
 import numpy as np
 from sklearn import tree
+from sklearn.model_selection import GridSearchCV
+
+# metrics
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import f1_score
+from sklearn.metrics import confusion_matrix
+
+# visualize our tree
 from sklearn.externals.six import StringIO  
 from sklearn.tree import export_graphviz
 import pydotplus
-from sklearn.metrics import accuracy_score
 
-from bokeh.plotting import figure, output_file, show, ColumnDataSource
-from bokeh.models import HoverTool
-from bokeh.models.widgets import Panel, Tabs
-from bokeh.models import NumeralTickFormatter, Range1d
-import math
+
 
 #############################################################################
 # import our csv into a dataframe
@@ -30,6 +35,10 @@ df = pd.read_csv('data/201710-CAH_PulseOfTheNation.csv')
 
 # keep only desired columns
 df = df.iloc[:,[0,1,2,4,5,6,8,10,13,16,18,20,21,22,23,24,25]]
+
+# shuffle up our data set
+df = df.sample(frac=1, random_state=42)
+
 
 
 #####################################################################################
@@ -72,62 +81,57 @@ df.loc[df['Q10']=='Darth Vader','Q10'] = "Vader"
 
 # break into booleans wit one hot encoding - 54 resulting features
 features = pd.get_dummies(df, columns=cat_features)
-print(features.head())
-
-
+#print(features.head())
 
 
 
 #############################################################################
-# train a decision trees using the features defined above
-#model = tree.DecisionTreeClassifier(criterion="entropy", max_features=1, min_samples_split=10, random_state=42)
-model = tree.DecisionTreeClassifier(criterion="entropy", random_state=42)
-model.fit(features,labels)
+# start with simple data spliting
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.2, random_state=42)
+
+
+
+#############################################################################
+# use GridSearchCV to find optimum parameters
+ 
+# set parameters to try
+
+parameters = {
+              'criterion':['entropy','gini'], 
+              'class_weight':[{1:1,0:1},{1:2,0:1},{1:1,0:2}],
+              'max_features':[None,5,10,15,20,50],
+              'max_leaf_nodes':[None,10,20,30,40,50],
+              'max_depth':[None,10,20,30,40,50],
+              'min_samples_split':[2,10,20,30,40,50,60,70,80,90,100]}
+ 
+# this example uses an tree model
+model = tree.DecisionTreeClassifier()
+clf = GridSearchCV(model, parameters)
+clf.fit(X_train,y_train)
+ 
+# get best fit parameters
+print(clf.best_params_)
 
 #Predict Output 
-predicted = model.predict(features)
- 
+predicted = clf.predict(X_test)
+
 # check our accuracy
-print(accuracy_score(labels,predicted))
+print("Accuracy:",accuracy_score(y_test,predicted))
+ 
+# % of all TRUE items that were classified as TRUE
+print("Recall score:", recall_score(y_test, predicted))
+ 
+# % of items classified TRUE that are really TRUE
+print("Precision score:", precision_score(y_test, predicted))
+ 
+# f1 score is weighted combination of the above
+print("F1 Score:",f1_score(y_test, predicted, average='macro'))
+
+tn, fp, fn, tp = confusion_matrix(y_test, predicted).ravel()
+print("False Positives:",fp)
+print("False Negatives:",fn)
 
 
-# look at feature importance
-feature_importance = {}
-for idx, val in enumerate(model.feature_importances_):
-    key = features.columns[idx]
-    feature_importance[idx]=[val,key]
-
-# sort and make readable
-feature_importance = pd.DataFrame.from_dict(feature_importance, orient='index').rename(columns={0:'Information-Gain',1:'Feature'})
-feature_importance = feature_importance.sort_values(by=['Information-Gain'],ascending=False)
-#print(feature_importance)
-
-
-#############################################################################
-# Visualize via Bokeh
-
- # put data in Bokeh format    
-source = ColumnDataSource(
-        data = {'Feature' : feature_importance["Feature"],
-                'InfoGain' : feature_importance["Information-Gain"]})
-    
-# use data for tooltips
-hover = HoverTool(
-        tooltips=[
-                ("Feature", "@Feature"), 
-                ("Information Gain", "@InfoGain"),                 
-            ]
-        )    
-
-# plot our information gain
-p1 = figure(x_range=feature_importance["Feature"].unique(), plot_width=800, title="Information Gain", tools=['pan','box_zoom','reset',hover])
-p1.vbar(x='Feature', top='InfoGain', width=0.9, source=source)
-p1.xaxis.axis_label = "Feature"
-p1.yaxis.axis_label = "Information Gain"
-p1.yaxis.formatter=NumeralTickFormatter(format="0.00000")
-p1.xaxis.major_label_orientation = math.pi/2
-p1.y_range=Range1d(0, .4)
-#tab1 = Panel(child=p1, title='Information Gain')
-show(p1)
 
 

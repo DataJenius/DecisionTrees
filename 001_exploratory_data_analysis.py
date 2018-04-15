@@ -151,9 +151,6 @@ def plot_discrete_feature(df, discrete):
     #show(p)
     return(p)
 
-
-
-
 #############################################################################
 # split income into 3 groups**
     
@@ -162,9 +159,7 @@ df["Do you earn $100,000 or more per year?"] = "No Answer"
 df.loc[df['Income'] < 100000,"Do you earn $100,000 or more per year?"] = "No"
 df.loc[df['Income'] >= 100000,"Do you earn $100,000 or more per year?"] = "Yes"
 p1 = plot_discrete_feature(df, 'Do you earn $100,000 or more per year?')
-#show(p1)
-#tab1 = Panel(child=p1, title='Income')
-
+tab1 = Panel(child=p1, title='Purity')
 
 # group political affiliation into 4 groups
 df["What is your political affiliation?"] = "No Answer"
